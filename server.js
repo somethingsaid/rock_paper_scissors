@@ -1,7 +1,6 @@
 // Dependencies
 // -----------------------------------------------------
 var express = require('express');
-var port  = process.env.PORT || 4000;
 var app  = express();
 var socket_io = require('socket.io');
 var http = require('http');
@@ -13,11 +12,11 @@ var io = socket_io(server);
 
 // Logging and Parsing
 app.use(express.static(__dirname + '/public'));                 // sets the static files location to public
+app.use('/node_modules',  express.static(__dirname + '/node_modules')); // Use Node Modules
 
 // Listen
 // -------------------------------------------------------
-app.listen(port);
-console.log('App listening on port ' + port);
+server.listen(8080);
 
 // Socket.io
 var usernames = {};
@@ -40,14 +39,15 @@ io.on('connection', function (socket) {
      if (Object.keys(usernames).length == 2) {
         io.emit('room full');
         io.emit('user list', usernames);
-     } else {
+     } 
+     else {
         socket.username = username;
         usernames[username] = username;
         user_added = true;      
-        
+
         io.emit('user list', usernames);
         console.log('[socket.io] %s has connected.', socket.username);
-        
+
         // Once there are two players, the game will start.
         if (Object.keys(usernames).length == 2) {
            io.emit('game start');

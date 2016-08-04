@@ -1,0 +1,25 @@
+{
+  "name": "rps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "socket.io": "^1.4.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somethingsaid/rock_paper_scissors.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/somethingsaid/rock_paper_scissors/issues"
+  },
+  "homepage": "https://github.com/somethingsaid/rock_paper_scissors#readme"
+}
