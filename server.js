@@ -1,33 +1,97 @@
 // Dependencies
 // -----------------------------------------------------
-var express         = require('express');
-var mongoose        = require('mongoose');
-var port            = process.env.PORT || 3000;
-var morgan          = require('morgan');
-var bodyParser      = require('body-parser');
-var methodOverride  = require('method-override');
-var app             = express();
+var express = require('express');
+var port  = process.env.PORT || 4000;
+var app  = express();
+var socket_io = require('socket.io');
+var http = require('http');
+var server = http.Server(app);
+var io = socket_io(server);
 
 // Express Configuration
 // -----------------------------------------------------
-// Sets the connection to MongoDB
-mongoose.connect("mongodb://localhost/MeanMapApp");
 
 // Logging and Parsing
 app.use(express.static(__dirname + '/public'));                 // sets the static files location to public
-app.use('/bower_components',  express.static(__dirname + '/bower_components')); // Use BowerComponents
-app.use(morgan('dev'));                                         // log with Morgan
-app.use(bodyParser.json());                                     // parse application/json
-app.use(bodyParser.urlencoded({extended: true}));               // parse application/x-www-form-urlencoded
-app.use(bodyParser.text());                                     // allows bodyParser to look at raw text
-app.use(bodyParser.json({ type: 'application/vnd.api+json'}));  // parse application/vnd.api+json as json
-app.use(methodOverride());
-
-// Routes
-// ------------------------------------------------------
-require('./app/routes.js')(app);
 
 // Listen
 // -------------------------------------------------------
 app.listen(port);
 console.log('App listening on port ' + port);
+
+// Socket.io
+var usernames = {};
+var choices = [];
+
+// Fires when the user connects.
+io.on('connection', function (socket) {
+  var user_added = false;
+  
+  // Checks to see if there are already two players.
+  // Otherwise, the connector will spectate.
+  if (Object.keys(usernames).length == 2) {
+     io.emit('room full');
+     io.emit('user list', usernames);
+  }
+  
+  // Fires once the connector types a username and hits ENTER.
+  socket.on('add user', function (username) {  
+     // Double checks to make sure a third user is not added.       
+     if (Object.keys(usernames).length == 2) {
+        io.emit('room full');
+        io.emit('user list', usernames);
+     } else {
+        socket.username = username;
+        usernames[username] = username;
+        user_added = true;      
+        
+        io.emit('user list', usernames);
+        console.log('[socket.io] %s has connected.', socket.username);
+        
+        // Once there are two players, the game will start.
+        if (Object.keys(usernames).length == 2) {
+           io.emit('game start');
+        }
+     }
+  });
+  
+  // Listens for choice submissions from the players.
+  socket.on('player choice', function (username, choice) {
+     choices.push({'user': username, 'choice': choice});
+     console.log('[socket.io] %s chose %s.', username, choice);
+     
+     // Once both players have submitted a choice, the game checks for the winner.
+     if (choices.length == 2) {
+        console.log('[socket.io] Both players have made choices.');            
+        if (choices[0]['choice'] === 'rock') {
+           if  (choices[1]['choice'] === 'rock')      io.emit('tie', choices);
+           if  (choices[1]['choice'] === 'paper')     io.emit('player 2 win', choices);
+           if  (choices[1]['choice'] === 'scissors')  io.emit('player 1 win', choices);
+           choices = [];
+        } else if (choices[0]['choice'] === 'paper') {
+           if  (choices[1]['choice'] === 'rock')      io.emit('player 1 win', choices);
+           if  (choices[1]['choice'] === 'paper')     io.emit('tie', choices);
+           if  (choices[1]['choice'] === 'scissors')  io.emit('player 2 win', choices);
+           choices = [];
+        } else if (choices[0]['choice'] === 'scissors') {
+           if  (choices[1]['choice'] === 'rock')      io.emit('player 2 win', choices);
+           if  (choices[1]['choice'] === 'paper')     io.emit('player 1 win', choices);
+           if  (choices[1]['choice'] === 'scissors')  io.emit('tie', choices);
+           choices = [];
+        }
+     }
+  });
+  
+  // Fires when a user disconnects.
+  socket.on('disconnect', function () {
+     // Removes player from the list and resets the game.
+     if (user_added) {
+        delete usernames[socket.username];
+        
+        io.emit('user list', usernames);
+        console.log('[socket.io] %s has disconnected.', socket.username);
+        choices = [];
+     }
+  });
+});
+
