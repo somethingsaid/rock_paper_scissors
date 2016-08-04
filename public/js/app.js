@@ -42,6 +42,17 @@ $(document).ready(function() {
       $('#game').show();
       $('#login').off('click');
    });
+
+   // socket.on('spectators', function() {
+   //    $('#login').hide();
+   //    $('#game').show();
+   //    $('#login').off('click');
+   //    $('.info').html('Room full, you are spectating...');
+   // });
+   // socket.on('redirect', function(destination) {
+   //      window.location.href(destination);
+   // });
+
    
    // Displays a listing of users.
    socket.on('user list', function(usernames) {

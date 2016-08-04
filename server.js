@@ -6,7 +6,6 @@ var socket_io = require('socket.io');
 var http = require('http');
 var server = http.Server(app);
 var io = socket_io(server);
-
 // Express Configuration
 // -----------------------------------------------------
 
@@ -22,22 +21,25 @@ server.listen(8080);
 var usernames = {};
 var choices = [];
 
+// redirection
+var destination = 'https://placekitten.com';
+
 // Fires when the user connects.
 io.on('connection', function (socket) {
   var user_added = false;
-  
+
   // Checks to see if there are already two players.
   // Otherwise, the connector will spectate.
   if (Object.keys(usernames).length == 2) {
      io.emit('room full');
      io.emit('user list', usernames);
+     io.emit('redirect', destination);
   }
   
   // Fires once the connector types a username and hits ENTER.
   socket.on('add user', function (username) {  
      // Double checks to make sure a third user is not added.       
      if (Object.keys(usernames).length == 2) {
-        io.emit('room full');
         io.emit('user list', usernames);
      } 
      else {
