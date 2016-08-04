@@ -67,7 +67,10 @@ $(document).ready(function() {
          socket.emit('player choice', username, choice);
          $('.info').html('Waiting for other player...');
          submitted = true;
-      } else $('.info').html('You have already made a choice!');
+      } 
+      else {
+         $('.info').html('You have already made a choice!');
+      }
    });
    
    // Countdown for added tension.
