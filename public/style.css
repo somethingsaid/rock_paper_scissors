@@ -1,0 +1,12 @@
+#map {
+	width: 645px;
+	height: 645px;
+}
+
+body {
+	background-color: #626D70;
+}
+
+.title, .footer-links {
+	color: #59B5D4;
+}
