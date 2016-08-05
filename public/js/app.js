@@ -37,23 +37,13 @@ $(document).ready(function() {
    });
    
    // If there is already two players, the third and onward will spectate --> immediately show #game
-   socket.on('room full', function() {
-      $('#login').hide();
-      $('#game').show();
-      $('#login').off('click');
+   socket.on('spectate', function(message) {
+      // $('#login').hide();
+      // $('#game').show();
+      // $('#login').off('click');
+      $('body').empty().html('<h1>' + message + '</h1>');
    });
 
-   // socket.on('spectators', function() {
-   //    $('#login').hide();
-   //    $('#game').show();
-   //    $('#login').off('click');
-   //    $('.info').html('Room full, you are spectating...');
-   // });
-   // socket.on('redirect', function(destination) {
-   //      window.location.href(destination);
-   // });
-
-   
    // Displays a listing of users.
    socket.on('user list', function(usernames) {
       $('.user_list').empty();
@@ -99,7 +89,7 @@ $(document).ready(function() {
          $('.info').html(choices[0]['user'] + ' picked ' + choices[0]['choice'] + '.'); 
       }, 3000);
       setTimeout(function () {
-         $('.info').after('<h1 class="info2">' + choices[1]['user'] + ' picked ' + choices[1]['choice'] + '.</h1>'); 
+         $('.info').after('<h3 class="info2">' + choices[1]['user'] + ' picked ' + choices[1]['choice'] + '.</h3>'); 
       }, 4000);
    }
    
@@ -107,7 +97,7 @@ $(document).ready(function() {
    socket.on('tie', function(choices) {
       countdown(choices);
       setTimeout(function() {
-         $('.info2').after('<h1 class="results">It was a tie.</h1>'); 
+         $('.info2').after('<h3 class="results">It was a tie.</h3>'); 
       }, 5000);
       submitted = false;
    });
@@ -116,7 +106,7 @@ $(document).ready(function() {
    socket.on('player 1 win', function(choices) {
       countdown(choices);
       setTimeout(function() {
-         $('.info2').after('<h1 class="results">' + choices[0]['user'] + ' wins!<h1>');
+         $('.info2').after('<h3 class="results">' + choices[0]['user'] + ' wins!<h3>');
       }, 5000);
       submitted = false;
    });
@@ -125,7 +115,7 @@ $(document).ready(function() {
    socket.on('player 2 win', function(choices) {
       countdown(choices);
       setTimeout(function() {
-         $('.info2').after('<h1 class="results">' + choices[1]['user'] + ' wins!<h1>');
+         $('.info2').after('<h3 class="results">' + choices[1]['user'] + ' wins!<h3>');
       }, 5000);
       submitted = false;
    });

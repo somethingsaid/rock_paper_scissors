@@ -20,24 +20,37 @@ server.listen(8080);
 // Socket.io
 var usernames = {};
 var choices = [];
-
-// redirection
-var destination = 'https://placekitten.com';
+var numConnections = 0;
 
 // Fires when the user connects.
 io.on('connection', function (socket) {
+  numConnections++;
+  console.log('Connections: ' + numConnections);
   var user_added = false;
 
-  // Checks to see if there are already two players.
+  // Checks to see if there are already two connections.
   // Otherwise, the connector will spectate.
-  if (Object.keys(usernames).length == 2) {
+  
+  if (numConnections > 2) {
+    socket.emit('spectate', 'Room is full (max. 2 connections), please try again later');
+  } 
+  else if (Object.keys(usernames).length == 2) {
      io.emit('room full');
      io.emit('user list', usernames);
-     io.emit('redirect', destination);
-  }
-  
+  }  
+  socket.on('disconnect', function () {
+    numConnections--;
+    // Removes player from the list and resets the game.
+   if (user_added) {
+      delete usernames[socket.username];
+      
+      io.emit('user list', usernames);
+      console.log('[socket.io] %s has disconnected.', socket.username);
+      choices = [];
+   }
+  });
   // Fires once the connector types a username and hits ENTER.
-  socket.on('add user', function (username) {  
+  socket.on('add user', function (username) {
      // Double checks to make sure a third user is not added.       
      if (Object.keys(usernames).length == 2) {
         io.emit('user list', usernames);
@@ -49,6 +62,7 @@ io.on('connection', function (socket) {
 
         io.emit('user list', usernames);
         console.log('[socket.io] %s has connected.', socket.username);
+        console.log("Number of players: " + numConnections);
 
         // Once there are two players, the game will start.
         if (Object.keys(usernames).length == 2) {
@@ -81,18 +95,6 @@ io.on('connection', function (socket) {
            if  (choices[1]['choice'] === 'scissors')  io.emit('tie', choices);
            choices = [];
         }
-     }
-  });
-  
-  // Fires when a user disconnects.
-  socket.on('disconnect', function () {
-     // Removes player from the list and resets the game.
-     if (user_added) {
-        delete usernames[socket.username];
-        
-        io.emit('user list', usernames);
-        console.log('[socket.io] %s has disconnected.', socket.username);
-        choices = [];
      }
   });
 });
