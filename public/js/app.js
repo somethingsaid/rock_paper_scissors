@@ -55,6 +55,9 @@ $(document).ready(function() {
    // Once there's two players, the game will start.
    socket.on('game start', function() {
       $('.info').html('Make your choice.');
+      $('.info2').empty();
+      $('.results').empty();
+      $('.choice').prop('checked', false);
       submitted = false;
    });
    

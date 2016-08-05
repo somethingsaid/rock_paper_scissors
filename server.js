@@ -95,6 +95,9 @@ io.on('connection', function (socket) {
            if  (choices[1]['choice'] === 'scissors')  io.emit('tie', choices);
            choices = [];
         }
+        setTimeout(function() {
+         io.emit('game start');
+        }, 7000);
      }
   });
 });
